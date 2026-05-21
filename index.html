@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Propuesta de Migración · Sistema COT Coloplast</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/white.css">
+
+  <style>
+    :root {
+      --navy:   #0f2a43;
+      --navy2:  #1d3f5c;
+      --accent: #00a3a3;
+      --accent2:#e8743b;
+      --red:    #c0392b;
+      --green:  #1e8449;
+      --gray:   #5d6b78;
+      --bg:     #ffffff;
+    }
+
+    .reveal { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #233; font-size: 30px; }
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--navy); font-weight: 700; text-transform: none; letter-spacing: 0; }
+    .reveal h1 { font-size: 1.95em; line-height: 1.15; }
+    .reveal h2 { font-size: 1.35em; margin-bottom: .55em; }
+    .reveal h3 { font-size: 1.05em; }
+    .reveal section { text-align: left; }
+    .reveal .slides section .center { text-align: center; }
+    .reveal strong { color: var(--navy); }
+    .reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+    .reveal a { color: var(--accent); }
+
+    .reveal ul { display: block; }
+    .reveal li { margin: .28em 0; line-height: 1.35; }
+
+    .kicker {
+      display: inline-block; background: var(--accent); color: #fff;
+      font-size: .42em; font-weight: 700; letter-spacing: .12em;
+      padding: .35em .9em; border-radius: 3px; text-transform: uppercase; margin-bottom: .6em;
+    }
+    .lead { color: var(--gray); font-size: .9em; }
+
+    .bar { height: 6px; width: 90px; background: var(--accent2); border-radius: 3px; margin: .2em 0 .7em; }
+
+    .cards { display: flex; gap: 18px; flex-wrap: wrap; }
+    .card {
+      flex: 1; min-width: 0; background: #f4f6f8; border-radius: 10px;
+      padding: 18px 20px; border-top: 4px solid var(--accent);
+    }
+    .card.red    { border-top-color: var(--red); }
+    .card.green  { border-top-color: var(--green); }
+    .card.amber  { border-top-color: var(--accent2); }
+    .card h3 { margin: 0 0 .35em; font-size: .92em; }
+    .card p, .card ul { font-size: .72em; color: var(--gray); margin: .2em 0; }
+    .card ul { padding-left: 1.05em; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+    table.tbl { width: 100%; border-collapse: collapse; font-size: .68em; }
+    table.tbl th { background: var(--navy); color: #fff; padding: 9px 11px; text-align: left; }
+    table.tbl td { padding: 8px 11px; border-bottom: 1px solid #dde3e8; vertical-align: top; }
+    table.tbl tr:nth-child(even) td { background: #f4f6f8; }
+    .tag-bad  { color: var(--red);   font-weight: 700; }
+    .tag-good { color: var(--green); font-weight: 700; }
+
+    .flow { display: flex; align-items: stretch; gap: 8px; font-size: .6em; }
+    .flow .step {
+      flex: 1; background: #f4f6f8; border: 1px solid #d8dee4; border-radius: 8px;
+      padding: 12px 10px; text-align: center;
+    }
+    .flow .step b { display: block; color: var(--navy); font-size: 1.05em; margin-bottom: 3px; }
+    .flow .step span { color: var(--gray); }
+    .flow .arrow { display: flex; align-items: center; color: var(--accent); font-weight: 700; font-size: 1.4em; }
+    .flow .step.ext { background: #fdeee7; border-color: var(--accent2); }
+    .flow .step.db  { background: #e7f4f4; border-color: var(--accent); }
+
+    .pill {
+      display: inline-block; background: var(--navy); color: #fff; font-size: .58em;
+      padding: .3em .7em; border-radius: 20px; margin: 3px 4px 3px 0; font-weight: 600;
+    }
+    .pill.alt { background: var(--accent); }
+    .pill.alt2{ background: var(--accent2); }
+
+    .phase { display: flex; gap: 14px; margin-bottom: 12px; align-items: stretch; }
+    .phase .num {
+      flex: 0 0 86px; background: var(--navy); color: #fff; border-radius: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-weight: 700;
+    }
+    .phase .num small { font-size: .42em; font-weight: 600; opacity: .8; }
+    .phase .num span  { font-size: .9em; }
+    .phase .body { flex: 1; background: #f4f6f8; border-radius: 8px; padding: 10px 16px; }
+    .phase .body h3 { margin: 0 0 .15em; font-size: .82em; }
+    .phase .body p  { margin: 0; font-size: .62em; color: var(--gray); }
+    .phase .dur { color: var(--accent2); font-weight: 700; font-size: .62em; }
+
+    /* --- diagrama de arquitectura --- */
+    .archdiag { display: flex; align-items: stretch; gap: 6px; }
+    .archdiag .zone { flex: 1; border: 2px dashed #c2ccd4; border-radius: 10px; padding: 10px 11px; }
+    .archdiag .zone.server { border: 2px solid var(--accent); background: #eef8f8; flex: 1.35; }
+    .zone-title {
+      font-size: .5em; font-weight: 700; color: var(--navy); text-transform: uppercase;
+      letter-spacing: .05em; margin-bottom: 8px; text-align: center;
+    }
+    .comp { background: #fff; border: 1px solid #d8dee4; border-radius: 7px; padding: 7px 10px; margin-bottom: 7px; }
+    .comp b { display: block; color: var(--navy); font-size: .58em; }
+    .comp span { display: block; color: var(--gray); font-size: .5em; line-height: 1.25; }
+    .comp.tech { border-left: 4px solid var(--accent); }
+    .comp.db   { border-left: 4px solid var(--navy); }
+    .comp.keep { border-left: 4px solid var(--gray); background: #f4f6f8; }
+    .comp.ext  { border-left: 4px solid var(--accent2); background: #fdeee7; }
+    .archarrow { display: flex; align-items: center; color: var(--accent); font-size: 1.1em; font-weight: 700; }
+    .archnote { font-size: .47em; color: var(--green); font-weight: 600; text-align: center; margin-top: 4px; }
+
+    .footer {
+      position: absolute; bottom: 14px; left: 60px; right: 60px;
+      font-size: 13px; color: #9aa7b2; border-top: 1px solid #e3e8ec; padding-top: 7px;
+      display: flex; justify-content: space-between;
+    }
+    .reveal .slide-number { background: var(--navy); }
+
+    .quote-evi {
+      background: #fbf3f0; border-left: 4px solid var(--accent2); padding: 6px 12px;
+      font-family: "Consolas", monospace; font-size: .52em; color: #7a5440; margin-top: .3em;
+    }
+    .big-num { font-size: 1.5em; color: var(--accent); font-weight: 800; }
+  </style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+  <!-- 1 · PORTADA -->
+  <section data-background-color="#0f2a43">
+    <div style="color:#fff">
+      <span class="kicker" style="background:var(--accent2)">Propuesta técnica · 2026</span>
+      <h1 style="color:#fff">Migración del Sistema COT</h1>
+      <h1 style="color:var(--accent);font-size:1.3em;margin-top:-.2em">De aplicación de escritorio a plataforma web</h1>
+      <div class="bar"></div>
+      <p class="lead" style="color:#aebfce;font-size:1em">
+        Modernización del proceso de generación del Código de Operación de Traslado (ARBA)
+      </p>
+      <p style="color:#7e94a8;font-size:.62em;margin-top:1.4em">
+        Coloplast · Reemplazo del sistema actual manteniendo modelo de datos e integración
+      </p>
+    </div>
+  </section>
+
+  <!-- 2 · AGENDA -->
+  <section>
+    <span class="kicker">Agenda</span>
+    <h2>Qué vamos a ver</h2>
+    <div class="bar"></div>
+    <div class="grid2">
+      <div>
+        <p><strong>1.</strong> &nbsp;Contexto: por qué existe este sistema</p>
+        <p><strong>2.</strong> &nbsp;Cómo funciona hoy</p>
+        <p><strong>3.</strong> &nbsp;Diagnóstico: problemas y riesgos</p>
+        <p><strong>4.</strong> &nbsp;La propuesta: plataforma web moderna</p>
+      </div>
+      <div>
+        <p><strong>5.</strong> &nbsp;Arquitectura y tecnología</p>
+        <p><strong>6.</strong> &nbsp;Qué se mantiene / qué cambia</p>
+        <p><strong>7.</strong> &nbsp;Mejoras propuestas</p>
+        <p><strong>8.</strong> &nbsp;Plan por fases, plazos y próximos pasos</p>
+      </div>
+    </div>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>Contexto → Propuesta → Plan</span></div>
+  </section>
+
+  <!-- 3 · CONTEXTO -->
+  <section>
+    <span class="kicker">Contexto</span>
+    <h2>Por qué existe este sistema</h2>
+    <div class="bar"></div>
+    <div class="cards">
+      <div class="card">
+        <h3>El requisito legal</h3>
+        <p>ARBA exige el <strong>COT</strong> (Código de Operación de Traslado) para circular mercadería dentro de la Provincia de Buenos Aires. Cada remito debe obtener su código antes de salir.</p>
+      </div>
+      <div class="card amber">
+        <h3>La restricción</h3>
+        <p>Existía un <strong>freeze sobre JDE</strong>: no se podían tocar objetos del ERP. Se construyó una <strong>solución por fuera</strong>, rápida, para no frenar la operación.</p>
+      </div>
+      <div class="card">
+        <h3>Hoy</h3>
+        <p>JDE <strong>sigue sin tocarse</strong>. La solución provisoria quedó como sistema productivo crítico. Necesita modernizarse <strong>sin intervenir el ERP</strong>.</p>
+      </div>
+    </div>
+    <p style="margin-top:.9em;font-size:.78em;color:var(--gray)">
+      La propuesta de migrar el proceso <em>dentro</em> de JDE no es viable: la decisión es no desarrollar sobre el ERP.
+      Por eso planteamos un <strong>sistema externo, moderno y web</strong> que replica lo actual y lo mejora.
+    </p>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>03</span></div>
+  </section>
+
+  <!-- 4 · CÓMO FUNCIONA HOY -->
+  <section>
+    <span class="kicker">Situación actual</span>
+    <h2>Cómo funciona hoy el proceso</h2>
+    <div class="bar"></div>
+    <div class="flow">
+      <div class="step"><b>JDE</b><span>Exporta CSV de remitos (cabecera + artículos) a una carpeta de red</span></div>
+      <div class="arrow">›</div>
+      <div class="step"><b>App Java</b><span>Lee los CSV, arma los remitos (50 campos + productos)</span></div>
+      <div class="arrow">›</div>
+      <div class="step db"><b>Access .accdb</b><span>Guarda remitos, productos y errores en archivo local</span></div>
+      <div class="arrow">›</div>
+      <div class="step ext"><b>any2cot.exe</b><span>Se invoca por un .bat; llama al web service de ARBA</span></div>
+      <div class="arrow">›</div>
+      <div class="step"><b>Resultado</b><span>COT asignado o errores · PDF de constancia</span></div>
+    </div>
+    <div class="cards" style="margin-top:1.1em">
+      <div class="card">
+        <h3>Operatoria del usuario</h3>
+        <p>Cargar remitos → asignar fecha de salida → procesar COT → consultar estados, productos y errores.</p>
+      </div>
+      <div class="card">
+        <h3>Mantenimiento</h3>
+        <p>ABM de tablas ARBA (unidades de medida y códigos de producto: mapeo JDE↔ARBA), secuencias y configuración.</p>
+      </div>
+      <div class="card db">
+        <h3>Lo valioso a conservar</h3>
+        <p>El modelo de datos, la lógica de mapeo y la integración con el web service del COT <strong>ya están probados</strong>.</p>
+      </div>
+    </div>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>04</span></div>
+  </section>
+
+  <!-- 5 · DIAGNÓSTICO -->
+  <section>
+    <span class="kicker">Diagnóstico</span>
+    <h2>Problemas del sistema actual</h2>
+    <div class="bar"></div>
+    <table class="tbl">
+      <tr><th style="width:26%">Problema</th><th>Causa técnica (verificada en el código)</th><th style="width:20%">Impacto</th></tr>
+      <tr><td><strong>Performance</strong></td><td>Base de datos Microsoft Access en carpeta de red; cada operación transfiere el archivo por la LAN.</td><td class="tag-bad">Lentitud y bloqueos</td></tr>
+      <tr><td><strong>Incompatibilidad Windows</strong></td><td>Despliegue por Java Web Start / applet (JNLP), tecnología discontinuada y removida de las versiones modernas de Java.</td><td class="tag-bad">Riesgo de no abrir</td></tr>
+      <tr><td><strong>No multiusuario</strong></td><td>Access como archivo único, sin control de concurrencia; dos usuarios en simultáneo corrompen o bloquean datos.</td><td class="tag-bad">Datos en riesgo</td></tr>
+      <tr><td><strong>Solo escritorio</strong></td><td>Interfaz Java Swing instalada localmente; sin acceso web ni remoto.</td><td class="tag-bad">Cero movilidad</td></tr>
+      <tr><td><strong>Sin seguridad</strong></td><td>No hay login, usuarios ni permisos. Contraseña de ARBA en texto plano en un archivo <code>.properties</code>.</td><td class="tag-bad">Acceso sin control</td></tr>
+      <tr><td><strong>Sin backups / auditoría</strong></td><td>No hay respaldo de tablas ni registro de quién hizo qué; el log es solo consola.</td><td class="tag-bad">Pérdida potencial</td></tr>
+      <tr><td><strong>Fragilidad</strong></td><td>SQL armado por concatenación de texto, rutas fijas en el código, integración vía <code>.exe</code> + <code>.bat</code> + espera de archivos.</td><td class="tag-bad">Errores difíciles</td></tr>
+    </table>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>05</span></div>
+  </section>
+
+  <!-- 6 · EVIDENCIA / RIESGO DE NO HACER NADA -->
+  <section>
+    <span class="kicker">Riesgo</span>
+    <h2>Qué pasa si no se actúa</h2>
+    <div class="bar"></div>
+    <div class="grid2">
+      <div>
+        <div class="card red" style="margin-bottom:14px">
+          <h3>Riesgo de continuidad</h3>
+          <p>Java Web Start está discontinuado. Una actualización de Windows o de Java puede dejar el sistema <strong>sin poder abrirse</strong> — y sin COT no sale mercadería.</p>
+        </div>
+        <div class="card red">
+          <h3>Riesgo sobre los datos</h3>
+          <p>Una base Access en red, sin backups y sin concurrencia, es un <strong>punto único de falla</strong>. Una corrupción del archivo no tiene recuperación garantizada.</p>
+        </div>
+      </div>
+      <div>
+        <div class="card red" style="margin-bottom:14px">
+          <h3>Riesgo operativo</h3>
+          <p>La integración por <code>.exe</code> y archivos depende de rutas y permisos del equipo. Si falla, el diagnóstico es manual y depende de una sola persona.</p>
+        </div>
+        <div class="card red">
+          <h3>Riesgo de cumplimiento</h3>
+          <p>Sin trazabilidad ni control de accesos, es difícil demostrar el correcto procesamiento de los traslados ante una auditoría.</p>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:.8em;font-size:.8em;color:var(--navy)">
+      <strong>Es deuda técnica que crece:</strong> cada mes que pasa, el sistema es más difícil y más caro de sostener.
+    </p>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>06</span></div>
+  </section>
+
+  <!-- 7 · LA PROPUESTA -->
+  <section data-background-color="#0f2a43">
+    <div style="color:#fff">
+      <span class="kicker" style="background:var(--accent2)">La propuesta</span>
+      <h2 style="color:#fff">Una plataforma web moderna que hace lo mismo — mejor</h2>
+      <div class="bar"></div>
+      <div class="grid3" style="margin-top:.6em">
+        <div style="background:#1d3f5c;border-radius:10px;padding:16px">
+          <h3 style="color:var(--accent)">Replicar</h3>
+          <p style="color:#aebfce;font-size:.62em">El mismo modelo de datos, la misma lógica de negocio y la misma integración con el web service del COT. Cero sorpresas para el usuario.</p>
+        </div>
+        <div style="background:#1d3f5c;border-radius:10px;padding:16px">
+          <h3 style="color:var(--accent)">Modernizar</h3>
+          <p style="color:#aebfce;font-size:.62em">Web, base centralizada multiusuario, seguridad, backups y trazabilidad. Accesible desde el navegador, sin instalar nada.</p>
+        </div>
+        <div style="background:#1d3f5c;border-radius:10px;padding:16px">
+          <h3 style="color:var(--accent)">Sin tocar JDE</h3>
+          <p style="color:#aebfce;font-size:.62em">JDE sigue exportando sus CSV exactamente igual. El nuevo sistema los consume. <strong style="color:#fff">Cero cambios en el ERP.</strong></p>
+        </div>
+      </div>
+      <p style="color:#7e94a8;font-size:.62em;margin-top:1.1em">
+        Principio rector: <em style="color:var(--accent2)">misma funcionalidad y misma operatoria conocida</em> — la migración es de tecnología, no de proceso.
+      </p>
+    </div>
+  </section>
+
+  <!-- 8 · ARQUITECTURA -->
+  <section>
+    <span class="kicker">Arquitectura</span>
+    <h2>Cómo se ve el sistema nuevo</h2>
+    <div class="bar"></div>
+    <div class="flow" style="font-size:.56em">
+      <div class="step"><b>JDE</b><span>Exporta CSV a una carpeta (igual que hoy)</span></div>
+      <div class="arrow">›</div>
+      <div class="step db"><b>Servicio de ingesta</b><span>El backend detecta y procesa los CSV automáticamente</span></div>
+      <div class="arrow">›</div>
+      <div class="step db"><b>Base PostgreSQL</b><span>Centralizada, multiusuario, con backups</span></div>
+      <div class="arrow">›</div>
+      <div class="step ext"><b>Web Service ARBA</b><span>El backend consume el servicio del COT directamente</span></div>
+      <div class="arrow">›</div>
+      <div class="step"><b>Navegador</b><span>Los usuarios operan vía web, sin instalar nada</span></div>
+    </div>
+    <div class="cards" style="margin-top:1em">
+      <div class="card">
+        <h3>Frontend — React</h3>
+        <p>Aplicación web con grillas, filtros y formularios. Misma operatoria que la pantalla actual.</p>
+      </div>
+      <div class="card">
+        <h3>Backend — Node.js</h3>
+        <p>API que concentra la lógica: ingesta, mapeos JDE↔ARBA, llamada al web service, estados y errores.</p>
+      </div>
+      <div class="card db">
+        <h3>Base — PostgreSQL</h3>
+        <p>Un solo origen de datos, transaccional, con respaldo automático y acceso concurrente seguro.</p>
+      </div>
+      <div class="card amber">
+        <h3>Despliegue</h3>
+        <p>En contenedores, en servidor on-premise de Coloplast o en la nube. Acceso por navegador.</p>
+      </div>
+    </div>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>08</span></div>
+  </section>
+
+  <!-- 9 · DIAGRAMA DE ARQUITECTURA -->
+  <section>
+    <span class="kicker">Arquitectura</span>
+    <h2>Diagrama de componentes — qué se instala en cada lugar</h2>
+    <div class="bar"></div>
+    <div class="archdiag">
+      <div class="zone">
+        <div class="zone-title">Puestos de usuario</div>
+        <div class="comp"><b>Navegador web</b><span>Chrome / Edge — ya instalado en el equipo</span></div>
+        <div class="archnote">✔ Nada que instalar ni mantener</div>
+      </div>
+      <div class="archarrow">⇄</div>
+      <div class="zone server">
+        <div class="zone-title">Servidor de aplicación · 1 servidor</div>
+        <div class="comp tech"><b>App Web — React</b><span>Interfaz servida al navegador</span></div>
+        <div class="comp tech"><b>API Backend — Node.js / NestJS</b><span>Lógica de negocio, mapeos JDE↔ARBA, estados</span></div>
+        <div class="comp tech"><b>Servicio de ingesta de CSV</b><span>Detecta y procesa los export de JDE</span></div>
+        <div class="comp db"><b>Base de datos — PostgreSQL</b><span>Remitos, productos, errores, usuarios</span></div>
+        <div class="archnote">✔ Todo empaquetado en contenedores (Docker)</div>
+      </div>
+      <div class="archarrow">⇄</div>
+      <div class="zone">
+        <div class="zone-title">Existente — sin cambios</div>
+        <div class="comp keep"><b>JDE (ERP)</b><span>Exporta los CSV — no se toca</span></div>
+        <div class="comp keep"><b>Carpeta CSV compartida</b><span>En la red interna de Coloplast</span></div>
+        <div class="comp ext"><b>Web Service ARBA</b><span>Genera el COT · requiere salida a internet</span></div>
+      </div>
+    </div>
+    <p style="margin-top:.9em;font-size:.66em;color:var(--gray)">
+      Toda la solución se instala en <strong>un único servidor</strong>: frontend, backend, ingesta y base de datos.
+      Los puestos de trabajo <strong>no requieren instalación</strong> y JDE no se modifica.
+    </p>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>09</span></div>
+  </section>
+
+  <!-- 10 · STACK -->
+  <section>
+    <span class="kicker">Tecnología</span>
+    <h2>Stack propuesto</h2>
+    <div class="bar"></div>
+    <div class="grid2">
+      <div>
+        <h3>Componentes</h3>
+        <p style="font-size:.7em;color:var(--gray)">Tecnologías estándar de la industria, con soporte activo y amplia disponibilidad de profesionales:</p>
+        <span class="pill alt">React + TypeScript</span>
+        <span class="pill alt">Node.js (NestJS)</span>
+        <span class="pill">PostgreSQL</span>
+        <span class="pill">ORM (Prisma)</span>
+        <span class="pill alt2">Docker</span>
+        <span class="pill alt2">Cliente Web Service COT</span>
+        <span class="pill">Autenticación + roles</span>
+        <span class="pill">Logs y auditoría</span>
+      </div>
+      <div>
+        <h3>Por qué este stack</h3>
+        <ul style="font-size:.68em;color:var(--gray)">
+          <li><strong>Vigente y con soporte</strong> — sin tecnologías discontinuadas.</li>
+          <li><strong>Web nativo</strong> — un solo despliegue, todos acceden por navegador.</li>
+          <li><strong>Mantenible</strong> — base de talento amplia; no depende de una persona.</li>
+          <li><strong>Seguro</strong> — consultas parametrizadas, credenciales protegidas.</li>
+          <li><strong>Portable</strong> — corre on-premise o en nube sin reescribir.</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:.6em;font-size:.66em;color:var(--gray)">
+      El stack puede ajustarse a estándares y políticas de IT de Coloplast (por ejemplo, integración con Active Directory / SSO corporativo).
+    </p>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>10</span></div>
+  </section>
+
+  <!-- 11 · DESPLIEGUE -->
+  <section>
+    <span class="kicker">Despliegue</span>
+    <h2>Dónde se aloja el sistema — a definir con IT</h2>
+    <div class="bar"></div>
+    <div class="card amber" style="margin-bottom:14px">
+      <h3>Requisitos de conectividad — válidos para cualquier opción</h3>
+      <p style="font-size:.74em">
+        ① El backend necesita <strong>salida a internet</strong> hacia el web service de ARBA. &nbsp;&nbsp;
+        ② El servicio de ingesta necesita <strong>acceso a la carpeta CSV</strong> de la red interna de Coloplast.
+      </p>
+    </div>
+    <div class="grid2">
+      <div class="card green">
+        <h3>Opción A · Servidor on-premise (Coloplast)</h3>
+        <ul>
+          <li>Acceso directo a la carpeta CSV y a la red interna</li>
+          <li>Los usuarios acceden por la LAN, sin exponer nada a internet</li>
+          <li>Datos dentro de Coloplast — favorable para cumplimiento</li>
+          <li>Solo hay que habilitar una salida puntual hacia ARBA</li>
+          <li><strong>Requiere:</strong> 1 máquina virtual (Linux + Docker), recursos modestos</li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <h3>Opción B · Nube / hosting pago</h3>
+        <ul>
+          <li>No depende de hardware de Coloplast; despliegue rápido</li>
+          <li>⚠ El server en la nube debe leer la carpeta CSV interna → VPN / túnel / agente</li>
+          <li>⚠ Las restricciones de salida a internet pueden bloquear el acceso de los usuarios</li>
+          <li>⚠ Costo mensual recurrente; datos fuera de la red corporativa</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:.7em;font-size:.64em;color:var(--navy)">
+      <strong>Recomendación:</strong> como los CSV viven en la red interna y suele haber restricción de salida a internet,
+      <em>un servidor on-premise es el camino de menor fricción</em>. La nube es viable, pero primero hay que resolver la conectividad con la red interna.
+    </p>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>11</span></div>
+  </section>
+
+  <!-- 12 · QUÉ SE MANTIENE / QUÉ CAMBIA -->
+  <section>
+    <span class="kicker">Alcance</span>
+    <h2>Qué se mantiene y qué cambia</h2>
+    <div class="bar"></div>
+    <table class="tbl">
+      <tr><th style="width:34%">Aspecto</th><th>Sistema actual</th><th>Sistema propuesto</th></tr>
+      <tr><td>Modelo de datos del remito</td><td class="tag-good">Se mantiene</td><td>Mismo modelo (50 campos + productos + errores)</td></tr>
+      <tr><td>Lógica de negocio y mapeos JDE↔ARBA</td><td class="tag-good">Se mantiene</td><td>Misma lógica, reimplementada y testeada</td></tr>
+      <tr><td>Integración con el COT (web service)</td><td class="tag-good">Se mantiene</td><td>Mismo servicio, llamado desde el backend</td></tr>
+      <tr><td>Ingesta de CSV desde JDE</td><td class="tag-good">Se mantiene</td><td>Mismo formato; JDE no se toca</td></tr>
+      <tr><td>Operatoria del usuario</td><td class="tag-good">Se mantiene</td><td>Mismas pantallas y pasos, ahora web</td></tr>
+      <tr><td>Plataforma</td><td class="tag-bad">Escritorio (Java Swing / JWS)</td><td>Web — navegador</td></tr>
+      <tr><td>Base de datos</td><td class="tag-bad">Access en red, archivo único</td><td>PostgreSQL centralizada, multiusuario</td></tr>
+      <tr><td>Integración técnica</td><td class="tag-bad">.exe + .bat + espera de archivos</td><td>Llamada directa al servicio desde el server</td></tr>
+      <tr><td>Seguridad y backups</td><td class="tag-bad">Inexistentes</td><td>Login, roles, auditoría y respaldo</td></tr>
+    </table>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>12</span></div>
+  </section>
+
+  <!-- 11 · MEJORAS -->
+  <section>
+    <span class="kicker">Valor agregado</span>
+    <h2>Mejoras propuestas (más allá de la paridad)</h2>
+    <div class="bar"></div>
+    <div class="grid3">
+      <div class="card green"><h3>Seguridad y accesos</h3><ul><li>Usuarios y roles</li><li>Integración SSO / AD</li><li>Credenciales ARBA cifradas</li></ul></div>
+      <div class="card green"><h3>Trazabilidad</h3><ul><li>Auditoría de acciones</li><li>Historial por remito</li><li>Log de errores consultable</li></ul></div>
+      <div class="card green"><h3>Reportes</h3><ul><li>Remitos por estado / fecha</li><li>Exportación a Excel / PDF</li><li>Tablero de seguimiento</li></ul></div>
+      <div class="card green"><h3>Procesamiento</h3><ul><li>Proceso de COT en lote</li><li>Reintentos automáticos</li><li>Alertas ante errores</li></ul></div>
+      <div class="card green"><h3>Operación</h3><ul><li>Backups automáticos</li><li>Ingesta automática de CSV</li><li>Sin instalación por equipo</li></ul></div>
+      <div class="card green"><h3>Experiencia</h3><ul><li>Búsqueda y filtros ágiles</li><li>Interfaz responsiva</li><li>Mensajes de error claros</li></ul></div>
+    </div>
+    <p style="margin-top:.7em;font-size:.66em;color:var(--gray)">
+      Las mejoras son <strong>opcionales y priorizables</strong>: el núcleo asegura la paridad funcional; estas suman valor de forma incremental.
+    </p>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>13</span></div>
+  </section>
+
+  <!-- 12 · PLAN POR FASES -->
+  <section>
+    <span class="kicker">Plan</span>
+    <h2>Plan de implementación por fases</h2>
+    <div class="bar"></div>
+    <div class="phase">
+      <div class="num"><small>FASE 0</small><span>1<br>sem.</span></div>
+      <div class="body"><h3>Relevamiento y diseño <span class="dur">· ~1 semana</span></h3>
+        <p>Validación del modelo de datos, definición de arquitectura, accesos a la red y al web service, diseño de UI y plan de pruebas.</p></div>
+    </div>
+    <div class="phase">
+      <div class="num" style="background:var(--accent)"><small>FASE 1</small><span>1½<br>sem.</span></div>
+      <div class="body"><h3>Núcleo / MVP <span class="dur">· ~1½ semanas</span></h3>
+        <p>Base PostgreSQL, ingesta de CSV de JDE, listado y consulta de remitos, login y usuarios. El sistema ya muestra y centraliza datos reales.</p></div>
+    </div>
+    <div class="phase">
+      <div class="num" style="background:var(--accent)"><small>FASE 2</small><span>2½<br>sem.</span></div>
+      <div class="body"><h3>Paridad funcional <span class="dur">· ~2½ semanas</span></h3>
+        <p>Procesamiento del COT contra ARBA, estados y errores, PDF de constancia, ABM de tablas ARBA y secuencias. Reemplaza por completo al sistema actual.</p></div>
+    </div>
+    <div class="phase">
+      <div class="num" style="background:var(--accent2)"><small>FASE 3</small><span>1<br>sem.</span></div>
+      <div class="body"><h3>Mejoras y puesta en producción <span class="dur">· ~1 semana</span></h3>
+        <p>Reportes, auditoría, backups, hardening, capacitación, marcha en paralelo y salida a producción.</p></div>
+    </div>
+    <p style="text-align:center;margin-top:.5em;font-size:.74em;color:var(--navy)">
+      <strong>Duración total estimada: ~6 semanas</strong> &nbsp;·&nbsp; con un entregable usable desde la Fase 1.
+    </p>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>14</span></div>
+  </section>
+
+  <!-- 13 · BENEFICIOS -->
+  <section>
+    <span class="kicker">Resultado</span>
+    <h2>Antes y después</h2>
+    <div class="bar"></div>
+    <table class="tbl">
+      <tr><th style="width:30%">Dimensión</th><th>Hoy</th><th>Con la migración</th></tr>
+      <tr><td>Acceso</td><td class="tag-bad">Instalado por equipo, solo escritorio</td><td class="tag-good">Navegador, desde cualquier puesto autorizado</td></tr>
+      <tr><td>Performance</td><td class="tag-bad">Archivo de BD viajando por la red</td><td class="tag-good">Servidor centralizado, respuesta inmediata</td></tr>
+      <tr><td>Concurrencia</td><td class="tag-bad">Un usuario a la vez (riesgo de corrupción)</td><td class="tag-good">Multiusuario seguro</td></tr>
+      <tr><td>Seguridad</td><td class="tag-bad">Sin login; contraseñas en texto plano</td><td class="tag-good">Usuarios, roles y credenciales cifradas</td></tr>
+      <tr><td>Continuidad</td><td class="tag-bad">Depende de tecnología discontinuada</td><td class="tag-good">Stack vigente y con soporte</td></tr>
+      <tr><td>Datos</td><td class="tag-bad">Sin backups ni trazabilidad</td><td class="tag-good">Respaldo automático y auditoría completa</td></tr>
+      <tr><td>Mantenibilidad</td><td class="tag-bad">Conocimiento concentrado en una persona</td><td class="tag-good">Tecnología estándar, equipo reemplazable</td></tr>
+    </table>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>15</span></div>
+  </section>
+
+  <!-- 14 · RIESGOS -->
+  <section>
+    <span class="kicker">Gestión del proyecto</span>
+    <h2>Riesgos y cómo los mitigamos</h2>
+    <div class="bar"></div>
+    <table class="tbl">
+      <tr><th style="width:40%">Riesgo</th><th>Mitigación</th></tr>
+      <tr><td>Comportamiento del web service de ARBA poco documentado</td><td>Fase 0 dedicada a validar la integración con casos reales antes de construir sobre ella.</td></tr>
+      <tr><td>Cambios futuros en el formato de export de JDE</td><td>Capa de ingesta desacoplada y configurable; un cambio de formato no afecta al resto del sistema.</td></tr>
+      <tr><td>Resistencia al cambio de los usuarios</td><td>Se conserva la operatoria; capacitación y período de marcha en paralelo con el sistema actual.</td></tr>
+      <tr><td>Migración de los datos históricos</td><td>Script de migración de Access a PostgreSQL, con validación y verificación de integridad.</td></tr>
+      <tr><td>Corte de servicio en la transición</td><td>El sistema actual sigue operativo hasta validar el nuevo en producción. Cero ventana sin COT.</td></tr>
+    </table>
+    <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>16</span></div>
+  </section>
+
+  <!-- 15 · CIERRE -->
+  <section data-background-color="#0f2a43">
+    <div style="color:#fff">
+      <span class="kicker" style="background:var(--accent2)">Próximos pasos</span>
+      <h2 style="color:#fff">Cómo avanzamos</h2>
+      <div class="bar"></div>
+      <div class="grid3" style="margin-top:.5em">
+        <div style="background:#1d3f5c;border-radius:10px;padding:18px">
+          <div class="big-num">1</div>
+          <p style="color:#cdd9e3;font-size:.66em"><strong style="color:#fff">Aprobación del enfoque</strong><br>Validar alcance y prioridades de esta propuesta.</p>
+        </div>
+        <div style="background:#1d3f5c;border-radius:10px;padding:18px">
+          <div class="big-num">2</div>
+          <p style="color:#cdd9e3;font-size:.66em"><strong style="color:#fff">Accesos y kickoff</strong><br>Habilitar accesos a red, web service y datos. Arrancar la Fase 0.</p>
+        </div>
+        <div style="background:#1d3f5c;border-radius:10px;padding:18px">
+          <div class="big-num">3</div>
+          <p style="color:#cdd9e3;font-size:.66em"><strong style="color:#fff">Entrega incremental</strong><br>Primer entregable usable en la Fase 1; producción en ~4–5 meses.</p>
+        </div>
+      </div>
+      <p style="color:#aebfce;font-size:.8em;margin-top:1.3em">
+        Migramos <em style="color:var(--accent2)">la tecnología, no el proceso</em>: mismo resultado para el negocio,
+        sobre una base sólida, segura y preparada para crecer.
+      </p>
+      <p style="color:#7e94a8;font-size:.6em;margin-top:1.6em">¿Preguntas? · Gracias.</p>
+    </div>
+  </section>
+
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    width: 1280,
+    height: 760,
+    margin: 0.045
+  });
+</script>
+</body>
+</html>
