@@ -114,10 +114,11 @@
     .archarrow { display: flex; align-items: center; color: var(--accent); font-size: 1.1em; font-weight: 700; }
     .archnote { font-size: .47em; color: var(--green); font-weight: 600; text-align: center; margin-top: 4px; }
 
-    .footer {
-      position: absolute; bottom: 14px; left: 60px; right: 60px;
-      font-size: 13px; color: #9aa7b2; border-top: 1px solid #e3e8ec; padding-top: 7px;
-      display: flex; justify-content: space-between;
+    .footer { display: none; }
+    .deck-footer {
+      position: fixed; bottom: 7px; left: 0; right: 0;
+      text-align: center; font-size: 12px; letter-spacing: .04em;
+      color: #9aa7b2; z-index: 31; pointer-events: none;
     }
     .reveal .slide-number { background: var(--navy); }
 
@@ -191,17 +192,17 @@
         <p>ARBA exige el <strong>COT</strong> (Código de Operación de Traslado) para circular mercadería dentro de la Provincia de Buenos Aires. Cada remito debe obtener su código antes de salir.</p>
       </div>
       <div class="card amber">
-        <h3>La restricción</h3>
-        <p>Existía un <strong>freeze sobre JDE</strong>: no se podían tocar objetos del ERP. Se construyó una <strong>solución por fuera</strong>, rápida, para no frenar la operación.</p>
+        <h3>El origen</h3>
+        <p>El sistema actual se creó como una <strong>solución externa y rápida</strong> para resolver la urgencia operativa, sin depender de desarrollos sobre JDE.</p>
       </div>
       <div class="card">
         <h3>Hoy</h3>
-        <p>JDE <strong>sigue sin tocarse</strong>. La solución provisoria quedó como sistema productivo crítico. Necesita modernizarse <strong>sin intervenir el ERP</strong>.</p>
+        <p>Hoy <strong>no hay un freeze</strong>. Pero llevar el proceso a JDE exigía <strong>instalar componentes Java en el servidor del ERP</strong>, y el área de Tecnología no autorizó esa instalación.</p>
       </div>
     </div>
     <p style="margin-top:.9em;font-size:.78em;color:var(--gray)">
-      La propuesta de migrar el proceso <em>dentro</em> de JDE no es viable: la decisión es no desarrollar sobre el ERP.
-      Por eso planteamos un <strong>sistema externo, moderno y web</strong> que replica lo actual y lo mejora.
+      Descartado el desarrollo sobre JDE, el camino es <strong>modernizar la solución externa</strong>:
+      un sistema web actual que replica lo que ya funciona y lo mejora, sin instalar nada en el entorno del ERP.
     </p>
     <div class="footer"><span>Migración Sistema COT · Coloplast</span><span>03</span></div>
   </section>
@@ -595,7 +596,9 @@
     </div>
   </section>
 
-</div></div>
+</div>
+  <div class="deck-footer">Migración Sistema COT · Coloplast</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
 <script>
